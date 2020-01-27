@@ -47,49 +47,54 @@ func (r *randIO) randomR(lo, hi int) int {
 	return rand.Intn(hi-lo) + lo
 }
 
-func intro(ctx consoleEff) *settings {
-	ctx.putStrLn("Guessing Game")
-
-	var turnsS, loS, hiS string
-	var turns, lo, hi int
-	var err error
-
+func getTurns(ctx consoleEff) int {
 	for {
-		turnsS = ctx.getLine("turns: ")
-		turns, err = strconv.Atoi(turnsS)
+		turnsS := ctx.getLine("turns: ")
+		turns, err := strconv.Atoi(turnsS)
 		if err != nil {
 			ctx.putStrLn(turnsS + " is not an int")
 		} else if turns < 1 {
 			ctx.putStrLn("turns must be > 0")
 		} else {
-			break
+			return turns
 		}
 	}
+}
 
+func getLow(ctx consoleEff) int {
 	for {
-		loS = ctx.getLine("low: ")
-		lo, err = strconv.Atoi(loS)
+		loS := ctx.getLine("low: ")
+		lo, err := strconv.Atoi(loS)
 		if err != nil {
 			ctx.putStrLn(loS + " is not an int")
 		} else if lo < 0 {
 			ctx.putStrLn("low must be >= 0")
 		} else {
-			break
+			return lo
 		}
 	}
+}
 
+func getHigh(ctx consoleEff, lo int) int {
 	for {
-		hiS = ctx.getLine("high: ")
-		hi, err = strconv.Atoi(hiS)
+		hiS := ctx.getLine("high: ")
+		hi, err := strconv.Atoi(hiS)
 		if err != nil {
 			ctx.putStrLn(hiS + " is not an int")
 		} else if hi < lo {
 			ctx.putStrLn("high must be >= low")
 		} else {
-			break
+			return hi
 		}
 	}
+}
 
+func intro(ctx consoleEff) *settings {
+	ctx.putStrLn("Guessing Game")
+
+	turns := getTurns(ctx)
+	lo := getLow(ctx)
+	hi := getHigh(ctx, lo)
 	return &settings{turns, lo, hi}
 }
 
