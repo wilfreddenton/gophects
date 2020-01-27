@@ -40,28 +40,53 @@ func assert(t *testing.T, g, e interface{}) {
 	}
 }
 
-func TestIntro(t *testing.T) {
-	ctx := &consolePure{in: []string{"t", "0", "1", "x", "-1", "1", "y", "0", "10"}}
-	r := intro(ctx)
-	assert(t, ctx.out, `Guessing Game
-turns: t
+func TestGetTurns(t *testing.T) {
+	ctx := &consolePure{in: []string{"t", "0", "1"}}
+	turns := getTurns(ctx)
+	assert(t, turns, 1)
+	assert(t, ctx.out, `turns: t
 t is not an int
 turns: 0
 turns must be > 0
 turns: 1
-low: x
+`)
+}
+
+func TestGetLow(t *testing.T) {
+	ctx := &consolePure{in: []string{"x", "-1", "1"}}
+	lo := getLow(ctx)
+	assert(t, lo, 1)
+	assert(t, ctx.out, `low: x
 x is not an int
 low: -1
 low must be >= 0
 low: 1
-high: y
+`)
+}
+
+func TestGetHigh(t *testing.T) {
+	ctx := &consolePure{in: []string{"y", "0", "10"}}
+	hi := getHigh(ctx, 1)
+	assert(t, hi, 10)
+	assert(t, ctx.out, `high: y
 y is not an int
 high: 0
 high must be >= low
 high: 10
 `)
+}
+
+func TestIntro(t *testing.T) {
+	ctx := &consolePure{in: []string{"5", "1", "10"}}
+	r := intro(ctx)
+	assert(t, r.turns, 5)
 	assert(t, r.lo, 1)
 	assert(t, r.hi, 10)
+	assert(t, ctx.out, `Guessing Game
+turns: 5
+low: 1
+high: 10
+`)
 }
 
 func TestPlayWin(t *testing.T) {
