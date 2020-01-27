@@ -136,6 +136,6 @@ func main() {
 		*randIO
 	}{&consoleIO{}, &randIO{}}
 
-	r := intro(ctx)
-	play(ctx, r)
+	s := intro(ctx)
+	play(ctx, s)
 }
