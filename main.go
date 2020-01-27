@@ -30,28 +30,42 @@ func (p *consoleIO) getLine(s string) string {
 	return in
 }
 
-type randRange struct {
-	lo int
-	hi int
+type settings struct {
+	turns int
+	lo    int
+	hi    int
 }
 
 type randEff interface {
-	randomR(*randRange) int
+	randomR(int, int) int
 }
 
 type randIO struct{}
 
-func (r *randIO) randomR(rr *randRange) int {
+func (r *randIO) randomR(lo, hi int) int {
 	rand.Seed(time.Now().UnixNano())
-	return rand.Intn(rr.hi-rr.lo) + rr.lo
+	return rand.Intn(hi-lo) + lo
 }
 
-func intro(ctx consoleEff) *randRange {
+func intro(ctx consoleEff) *settings {
 	ctx.putStrLn("Guessing Game")
 
-	var loS, hiS string
-	var lo, hi int
+	var turnsS, loS, hiS string
+	var turns, lo, hi int
 	var err error
+
+	for {
+		turnsS = ctx.getLine("turns: ")
+		turns, err = strconv.Atoi(turnsS)
+		if err != nil {
+			ctx.putStrLn(turnsS + " is not an int")
+		} else if turns < 1 {
+			ctx.putStrLn("turns must be > 0")
+		} else {
+			break
+		}
+	}
+
 	for {
 		loS = ctx.getLine("low: ")
 		lo, err = strconv.Atoi(loS)
@@ -76,7 +90,7 @@ func intro(ctx consoleEff) *randRange {
 		}
 	}
 
-	return &randRange{lo, hi}
+	return &settings{turns, lo, hi}
 }
 
 type playEff interface {
@@ -84,10 +98,11 @@ type playEff interface {
 	randEff
 }
 
-func play(ctx playEff, r *randRange) {
-	n := ctx.randomR(r)
+func play(ctx playEff, s *settings) {
+	n := ctx.randomR(s.lo, s.hi)
+	i := s.turns
 
-	for {
+	for i > 0 {
 		gS := ctx.getLine("guess: ")
 		g, err := strconv.Atoi(gS)
 		if err != nil {
@@ -101,9 +116,13 @@ func play(ctx playEff, r *randRange) {
 			ctx.putStrLn("lower")
 		} else {
 			ctx.putStrLn(gS + " is correct")
-			break
+			return
 		}
+
+		i -= 1
 	}
+
+	ctx.putStrLn("game over")
 }
 
 func main() {
